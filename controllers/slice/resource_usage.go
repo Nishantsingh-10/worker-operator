@@ -131,7 +131,7 @@ func (r *SliceReconciler) reconcileNamespaceResourceUsage(ctx context.Context, s
 			return ctrl.Result{}, err
 		}
 	}
-	log.Info("updating resource usage time to slice status config")
+	log.Info("updating resource usage time to slice status config", "epoch", currentTime)
 	slice.Status.ConfigUpdatedOn = currentTime
 	r.Status().Update(ctx, slice)
 	return ctrl.Result{}, nil

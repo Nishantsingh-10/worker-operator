@@ -170,6 +170,7 @@ func (r *SliceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	configUpdatedOn := slice.Status.ConfigUpdatedOn
 	// should call metric server each 60 seconds
 	if configUpdatedOn+sliceBakendUpdateInterval <= currentTime {
+		log.Info("calling metric API server")
 		_, err := r.reconcileNamespaceResourceUsage(ctx, slice, currentTime, configUpdatedOn)
 		if err != nil {
 			log.Error(err, "Failed to update Slice status for config")
