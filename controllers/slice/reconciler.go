@@ -52,6 +52,7 @@ type SliceReconciler struct {
 	HubClient          HubClientProvider
 	WorkerRouterClient WorkerRouterClientProvider
 	WorkerNetOpClient  WorkerNetOpClientProvider
+	MetricServerClient MetricServerProvider
 }
 
 //+kubebuilder:rbac:groups=networking.kubeslice.io,resources=slice,verbs=get;list;watch;create;update;patch;delete
@@ -163,6 +164,17 @@ func (r *SliceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if requeue {
 		debugLog.Info("Reconciling SliceNamespaces", "res", res, "err", err)
 		return res, err
+	}
+
+	currentTime := time.Now().Unix()
+	configUpdatedOn := slice.Status.ConfigUpdatedOn
+	// should call metric server each 60 seconds
+	if configUpdatedOn+sliceBakendUpdateInterval <= currentTime {
+		_, err := r.reconcileNamespaceResourceUsage(ctx, slice, currentTime, configUpdatedOn)
+		if err != nil {
+			log.Error(err, "Failed to update Slice status for config")
+			return ctrl.Result{}, err
+		}
 	}
 
 	debugLog.Info("Syncing slice QoS config with NetOp pods")

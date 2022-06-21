@@ -8,6 +8,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6
 	github.com/kubeslice/apis v0.0.0-20220518055057-d36bcfb73b97
+	github.com/kubeslice/apis-ent v0.0.0-20220602110517-cd25e58e1bdb
 	github.com/kubeslice/gateway-sidecar v0.0.0-20220506071225-eac5ccc17b42
 	github.com/kubeslice/netops v0.0.0-20220506082959-81fef290c265
 	github.com/kubeslice/router-sidecar v1.0.0
@@ -24,8 +25,9 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	istio.io/api v0.0.0-20210204223132-d90b2f705958
 	istio.io/client-go v1.9.0
-	k8s.io/api v0.23.5
-	k8s.io/apimachinery v0.23.5
-	k8s.io/client-go v0.23.5
+	k8s.io/api v0.24.2
+	k8s.io/apimachinery v0.24.2
+	k8s.io/client-go v0.24.2
+	k8s.io/metrics v0.24.2
 	sigs.k8s.io/controller-runtime v0.11.1
 )

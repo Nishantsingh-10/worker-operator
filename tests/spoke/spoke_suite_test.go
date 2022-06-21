@@ -36,7 +36,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	// spokev1alpha1 "github.com/kubeslice/apis-ent/pkg/worker/v1alpha1"
 	hubv1alpha1 "github.com/kubeslice/apis/pkg/controller/v1alpha1"
+
 	kubeslicev1beta1 "github.com/kubeslice/worker-operator/api/v1beta1"
 	"github.com/kubeslice/worker-operator/controllers/serviceexport"
 	"github.com/kubeslice/worker-operator/controllers/serviceimport"
@@ -47,9 +49,11 @@ import (
 	namespace "github.com/kubeslice/worker-operator/pkg/namespace/controllers"
 	"github.com/kubeslice/worker-operator/pkg/networkpolicy"
 	hce "github.com/kubeslice/worker-operator/tests/emulator/hubclient"
+	workermetricserver "github.com/kubeslice/worker-operator/tests/emulator/workerclient/metricserver"
 	workernetop "github.com/kubeslice/worker-operator/tests/emulator/workerclient/netop"
 	workerrouter "github.com/kubeslice/worker-operator/tests/emulator/workerclient/router"
 	workergw "github.com/kubeslice/worker-operator/tests/emulator/workerclient/sidecargw"
+
 	nsmv1alpha1 "github.com/networkservicemesh/networkservicemesh/k8s/pkg/apis/networkservice/v1alpha1"
 	istiov1beta1 "istio.io/client-go/pkg/apis/networking/v1beta1"
 	//+kubebuilder:scaffold:imports
@@ -68,6 +72,7 @@ var cancel context.CancelFunc
 var workerClientSidecarGwEmulator *workergw.ClientEmulator
 var workerClientRouterEmulator *workerrouter.ClientEmulator
 var workerClientNetopEmulator *workernetop.ClientEmulator
+var workerMetricServerEnulator *workermetricserver.ClientEmulator
 
 const CONTROL_PLANE_NS = "kubeslice-system"
 const PROJECT_NS = "kubeslice-cisco"
@@ -97,6 +102,10 @@ var _ = BeforeSuite(func() {
 
 	err = hubv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
+
+	// err = spokev1alpha1.AddToScheme(scheme.Scheme)
+	// Expect(err).NotTo(HaveOccurred())
+
 	err = istiov1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	err = nsmv1alpha1.AddToScheme(scheme.Scheme)
@@ -133,6 +142,9 @@ var _ = BeforeSuite(func() {
 	workerClientNetopEmulator, err = workernetop.NewClientEmulator()
 	Expect(err).ToNot(HaveOccurred())
 
+	workerMetricServerEnulator, err = workermetricserver.NewClientEmulator()
+	Expect(err).ToNot(HaveOccurred())
+
 	err = (&slice.SliceReconciler{
 		Client: k8sManager.GetClient(),
 		Scheme: k8sManager.GetScheme(),
@@ -143,6 +155,7 @@ var _ = BeforeSuite(func() {
 		HubClient:          hubClientEmulator,
 		WorkerRouterClient: workerClientRouterEmulator,
 		WorkerNetOpClient:  workerClientNetopEmulator,
+		MetricServerClient: workerMetricServerEnulator,
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

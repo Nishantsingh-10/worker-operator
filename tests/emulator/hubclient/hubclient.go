@@ -21,6 +21,7 @@ package hubclient
 import (
 	"context"
 
+	spokev1alpha1 "github.com/kubeslice/apis-ent/pkg/worker/v1alpha1"
 	kubeslicev1beta1 "github.com/kubeslice/worker-operator/api/v1beta1"
 	"github.com/stretchr/testify/mock"
 )
@@ -65,5 +66,9 @@ func (hubClientEmulator *HubClientEmulator) UpdateAppPodsList(
 	return nil
 }
 func (hubClientEmulator *HubClientEmulator) UpdateAppNamesapces(ctx context.Context, sliceConfigName string, onboardedNamespaces []string) error {
+	return nil
+}
+
+func (HubClientEmulator *HubClientEmulator) UpdateResourceUsage(ctx context.Context, sliceConfigName string, usage spokev1alpha1.WorkerSliceResourceQuotaStatus) error {
 	return nil
 }

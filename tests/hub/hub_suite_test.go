@@ -153,7 +153,7 @@ var _ = BeforeSuite(func() {
 		ControllerManagedBy(k8sManager).
 		For(&spokev1alpha1.WorkerServiceImport{}).
 		WithEventFilter(predicate.NewPredicateFuncs(func(object client.Object) bool {
-			return object.GetLabels()["worker-cluster"] == ns.ClusterName
+			return object.GetLabels()["worker-cluster"] == CLUSTER_NAME
 		})).
 		Complete(serviceImportReconciler)
 	Expect(err).ToNot(HaveOccurred())

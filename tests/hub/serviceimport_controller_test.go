@@ -57,6 +57,9 @@ var _ = Describe("Hub serviceImportController", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-service-import",
 					Namespace: PROJECT_NS,
+					Labels: map[string]string{
+						"worker-cluster": CLUSTER_NAME,
+					},
 				},
 				Spec: workerv1alpha1.WorkerServiceImportSpec{
 					SliceName:        "test-slice-1",
