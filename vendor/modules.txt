@@ -1,11 +1,15 @@
-# cloud.google.com/go v0.81.0
+# bitbucket.org/realtimeai/avesha-slice-operator v1.16.0
+## explicit
+bitbucket.org/realtimeai/avesha-slice-operator/internal/monitoring
+bitbucket.org/realtimeai/avesha-slice-operator/logger
+# cloud.google.com/go v0.90.0
 cloud.google.com/go/compute/metadata
 # github.com/Azure/go-autorest v14.2.0+incompatible
 github.com/Azure/go-autorest
-# github.com/Azure/go-autorest/autorest v0.11.18
+# github.com/Azure/go-autorest/autorest v0.11.19
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/azure
-# github.com/Azure/go-autorest/autorest/adal v0.9.13
+# github.com/Azure/go-autorest/autorest/adal v0.9.14
 github.com/Azure/go-autorest/autorest/adal
 # github.com/Azure/go-autorest/autorest/date v0.3.0
 github.com/Azure/go-autorest/autorest/date
@@ -57,11 +61,12 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/gofuzz v1.1.0
+# github.com/google/gofuzz v1.2.0
 github.com/google/gofuzz
+github.com/google/gofuzz/bytesource
 # github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 github.com/google/shlex
-# github.com/google/uuid v1.2.0
+# github.com/google/uuid v1.3.0
 github.com/google/uuid
 # github.com/googleapis/gnostic v0.5.5
 github.com/googleapis/gnostic/compiler
@@ -146,17 +151,28 @@ github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/stretchr/objx v0.1.1
+# github.com/stretchr/objx v0.2.0
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
-# github.com/vishvananda/netlink v1.1.0
+# github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
 github.com/vishvananda/netlink
 github.com/vishvananda/netlink/nl
-# github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df
+# github.com/vishvananda/netns v0.0.0-20200728191858-db3c7e526aae
 github.com/vishvananda/netns
+# go.opencensus.io v0.23.0
+## explicit
+go.opencensus.io/internal/tagencoding
+go.opencensus.io/metric
+go.opencensus.io/metric/metricdata
+go.opencensus.io/metric/metricproducer
+go.opencensus.io/resource
+go.opencensus.io/stats
+go.opencensus.io/stats/internal
+go.opencensus.io/stats/view
+go.opencensus.io/tag
 # go.uber.org/atomic v1.7.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.6.0
@@ -169,7 +185,7 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
-# golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 golang.org/x/crypto/pkcs12
 golang.org/x/crypto/pkcs12/internal/rc2
 # golang.org/x/net v0.0.0-20220225172249-27dd8689420f
@@ -335,7 +351,7 @@ gopkg.in/inf.v0
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
-# istio.io/api v0.0.0-20210204223132-d90b2f705958
+# istio.io/api v0.0.0-20210226184957-53be27d8195b
 ## explicit
 istio.io/api/analysis/v1alpha1
 istio.io/api/meta/v1alpha1
@@ -343,7 +359,7 @@ istio.io/api/networking/v1beta1
 # istio.io/client-go v1.9.0
 ## explicit
 istio.io/client-go/pkg/apis/networking/v1beta1
-# istio.io/gogo-genproto v0.0.0-20190930162913-45029607206a
+# istio.io/gogo-genproto v0.0.0-20210113155706-4daf5697332f
 istio.io/gogo-genproto/googleapis/google/api
 # k8s.io/api v0.23.5
 ## explicit

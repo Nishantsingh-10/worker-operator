@@ -33,6 +33,7 @@ import (
 	"github.com/kubeslice/worker-operator/controllers"
 	"github.com/kubeslice/worker-operator/pkg/events"
 	"github.com/kubeslice/worker-operator/pkg/logger"
+	"github.com/kubeslice/worker-operator/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -182,6 +183,8 @@ func (r Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resul
 		debugLog.Info("requeuing after app pod reconcile", "res", res, "er", err)
 		return res, nil
 	}
+
+	metrics.RecordServicecExportAvailableEndpointsCount(serviceexport.Status.AvailableEndpoints, controllers.ClusterName, serviceexport.Spec.Slice, serviceexport.Namespace, serviceexport.Name)
 
 	if serviceexport.Status.LastSync == 0 {
 		ingressGwPod, err := controllers.GetSliceIngressGwPod(ctx, r.Client, serviceexport.Spec.Slice)

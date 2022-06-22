@@ -37,6 +37,7 @@ import (
 	"github.com/kubeslice/worker-operator/pkg/events"
 	"github.com/kubeslice/worker-operator/pkg/logger"
 	"github.com/kubeslice/worker-operator/pkg/manifest"
+	"github.com/kubeslice/worker-operator/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -232,6 +233,15 @@ func (r *SliceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 		slice.Status.AppPods = appPods
 		slice.Status.AppPodsUpdatedOn = time.Now().Unix()
+
+		mapAppPodsPerNamespace := make(map[string][]kubeslicev1beta1.AppPod)
+		for _, appPod := range appPods {
+			mapAppPodsPerNamespace[appPod.PodNamespace] = append(mapAppPodsPerNamespace[appPod.PodNamespace], appPod)
+		}
+		// Set no. of app pods in prometheus metrics
+		for namespace, pods := range mapAppPodsPerNamespace {
+			metrics.RecordAppPodsCount(len(pods), controllers.ClusterName, slice.Name, namespace)
+		}
 
 		err = r.Status().Update(ctx, slice)
 		if err != nil {
