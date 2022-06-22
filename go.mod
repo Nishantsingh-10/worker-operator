@@ -3,7 +3,8 @@ module github.com/kubeslice/worker-operator
 go 1.16
 
 require (
-	bitbucket.org/realtimeai/avesha-slice-operator v1.16.0
+	bitbucket.org/realtimeai/avesha-slice-operator v1.16.0 // indirect
+	contrib.go.opencensus.io/exporter/prometheus v0.4.1
 	github.com/go-logr/logr v1.2.0
 	github.com/go-logr/zapr v1.2.0
 	github.com/golang/protobuf v1.5.2
@@ -15,6 +16,7 @@ require (
 	github.com/networkservicemesh/networkservicemesh/k8s/pkg/apis v0.0.0-20211028170547-e58ac1200f18
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.18.1
+	github.com/prometheus/client_golang v1.12.1
 	github.com/stretchr/testify v1.7.0
 	go.opencensus.io v0.23.0
 	go.uber.org/zap v1.21.0

@@ -28,7 +28,7 @@ import (
 
 // Declare labels
 var (
-	ClusterID = monitoring.MustCreateLabel("cluster_id")
+	ClusterName = monitoring.MustCreateLabel("clusterName")
 
 	Namespace = monitoring.MustCreateLabel("namespace")
 
@@ -47,14 +47,14 @@ var (
 	metricLog = logger.NewLogger().WithValues("type", "metrics")
 	// appPodsGauge is a prometheus metric which is a gauge of no. of app pods.
 	appPodsGauge = monitoring.NewGauge(
-		"avesha_slice_app_pods",
+		"kubeslice_slice_app_pods",
 		"No. of app pods in slice",
-		monitoring.WithLabels(ClusterID, Slice, Namespace),
+		monitoring.WithLabels(ClusterName, Slice, Namespace),
 	)
 	serviceExportAvailableEndpointsGauge = monitoring.NewGauge(
-		"avesha_service_export_available_endpoints",
+		"kubeslice_service_export_available_endpoints",
 		"No. of service exports avaialble endpoints in slice",
-		monitoring.WithLabels(ClusterID, Slice, Namespace, Service),
+		monitoring.WithLabels(ClusterName, Slice, Namespace, Service),
 	)
 )
 
@@ -63,18 +63,18 @@ Helper methods to update metrics from reconcilers
 */
 
 // RecordAppPodsCount records currently active app pod count in prometheus
-func RecordAppPodsCount(count int, clusterID, slice, ns string) {
-	metricLog.Info("Recording app pod count", "count", count, "clusterID", clusterID, "slice", slice, "ns", ns)
+func RecordAppPodsCount(count int, clusterName, slice, ns string) {
+	metricLog.Info("Recording app pod count", "count", count, "clusterName", clusterName, "slice", slice, "ns", ns)
 	appPodsGauge.
-		With(ClusterID.Value(clusterID), Slice.Value(slice), Namespace.Value(ns)).
+		With(ClusterName.Value(clusterName), Slice.Value(slice), Namespace.Value(ns)).
 		Record(float64(count))
 }
 
 // RecordServicecExportAvailableEndpointsCount records currently active serviceexports endpoints
-func RecordServicecExportAvailableEndpointsCount(count int, clusterID, slice, ns, svc string) {
-	metricLog.Info("Recording serviceexport available endpoint", "count", count, "clusterID", clusterID, "slice", slice, "ns", ns, "svc", svc)
+func RecordServicecExportAvailableEndpointsCount(count int, clusterName, slice, ns, svc string) {
+	metricLog.Info("Recording serviceexport available endpoint", "count", count, "clusterName", clusterName, "slice", slice, "ns", ns, "svc", svc)
 	serviceExportAvailableEndpointsGauge.
-		With(ClusterID.Value(clusterID), Slice.Value(slice), Namespace.Value(ns), Service.Value(svc)).
+		With(ClusterName.Value(clusterName), Slice.Value(slice), Namespace.Value(ns), Service.Value(svc)).
 		Record(float64(count))
 }
 
