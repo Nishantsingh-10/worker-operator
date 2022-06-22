@@ -44,7 +44,7 @@ Declaration of each metric
 */
 
 var (
-	metricLog = logger.NewLogger().WithName("Metrics").V(1)
+	metricLog = logger.NewLogger().WithValues("type", "metrics")
 	// appPodsGauge is a prometheus metric which is a gauge of no. of app pods.
 	appPodsGauge = monitoring.NewGauge(
 		"avesha_slice_app_pods",

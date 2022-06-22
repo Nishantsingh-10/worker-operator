@@ -38,7 +38,7 @@ import (
 type Unit string
 
 var (
-	log = logger.NewLogger().WithName("Monitoring").V(1)
+	log = logger.NewLogger().WithValues("type", "monitoring")
 )
 
 // Predefined units for use with the monitoring package.
