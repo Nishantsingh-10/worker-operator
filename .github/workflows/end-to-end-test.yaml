@@ -11,6 +11,14 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: ${{ github.event.pull_request.head.sha }}
+        
+    -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
     
     - name: build the worker-operator
       uses: docker/build-push-action@v2
