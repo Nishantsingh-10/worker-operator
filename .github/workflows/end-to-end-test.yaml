@@ -4,8 +4,8 @@ on:
     branches: [pr-wroker-operator]
   workflow_dispatch:
 jobs:
-  end-to-end:
-    runs-on: ubuntu-20.04
+  runner:
+    runs-on: [self-hosted, linux, X64, worker-operator ]
     steps:
     - name: checkout the repo
       uses: actions/checkout@v3
