@@ -64,3 +64,4 @@ jobs:
         EXTERNAL_REPOSITORY: kubeslice/e2e-allure-reports
         PUBLISH_DIR: allure-history
         keep_files: true
+        
