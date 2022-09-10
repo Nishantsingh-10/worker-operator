@@ -1,7 +1,7 @@
 name: end-to-end-test
 on:
-  pull_request_target:
-    branches: [ master ]
+  push:
+    branches: [ calico ]
   workflow_dispatch:
 jobs:
   end-to-end:
