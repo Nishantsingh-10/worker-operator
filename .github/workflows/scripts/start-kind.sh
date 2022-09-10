@@ -5,68 +5,68 @@ if [ ! $(kind get clusters | grep controller) ];then
   kind create cluster --name controller --config .github/workflows/scripts/cluster.yaml --image kindest/node:v1.22.7
 
   function wait_for_pods {
-  for ns in "$namespace"; do
-    for pod in $(kubectl get pods -n $ns | grep -v NAME | awk '{ print $1 }'); do
-      counter=0
-      echo kubectl get pod $pod -n $ns
-      kubectl get pod $pod -n $ns
-      while [[ ! ($(kubectl get po $pod -n $ns | grep $pod | awk '{print $3}') =~ ^Running$|^Completed$) ]]; do
-        sleep 1
-        let counter=counter+1
+    for ns in "$namespace"; do
+      for pod in $(kubectl get pods -n $ns | grep -v NAME | awk '{ print $1 }'); do
+        counter=0
+        echo kubectl get pod $pod -n $ns
+        kubectl get pod $pod -n $ns
+        while [[ ! ($(kubectl get po $pod -n $ns | grep $pod | awk '{print $3}') =~ ^Running$|^Completed$) ]]; do
+          sleep 1
+          let counter=counter+1
 
-        if ((counter == $sleep)); then
-          echo "POD $pod failed to start in $sleep seconds"
-          kubectl get events -n $ns --sort-by='.lastTimestamp'
-          echo "Exiting"
+          if ((counter == $sleep)); then
+            echo "POD $pod failed to start in $sleep seconds"
+            kubectl get events -n $ns --sort-by='.lastTimestamp'
+            echo "Exiting"
 
-          exit -1
-        fi
+            exit -1
+          fi
+        done
       done
     done
-  done
-}
+  }
 
-snap install kubectx --classic
+  snap install kubectx --classic
 
-# Install Calico in Controller...
-echo Switch to controller context and Install Calico...
-kubectx kind-controller
-kubectx
+  # Install Calico in Controller...
+  echo Switch to controller context and Install Calico...
+  kubectx kind-controller
+  kubectx
 
-echo Install the Tigera Calico operator...
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+  echo Install the Tigera Calico operator...
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
 
-echo "Check for tigera-operator pods"
-kubectl get pods -n tigera-operator
-echo "Wait for tigera-operator to be Running"
-namespace=tigera-operator
-sleep=60
-wait_for_pods
+  echo "Check for tigera-operator pods"
+  kubectl get pods -n tigera-operator
+  echo "Wait for tigera-operator to be Running"
+  namespace=tigera-operator
+  sleep=60
+  wait_for_pods
 
-kubectl get pods -n tigera-operator
+  kubectl get pods -n tigera-operator
 
-echo Install the custom resource definitions manifest...
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
-sleep 10
+  echo Install the custom resource definitions manifest...
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
+  sleep 60
 
-echo "Check for calico-system pods"
-kubectl get pods -n calico-system
-echo "Wait for Calico-system to be Running"
-namespace=calico-system
-sleep=600
-wait_for_pods
+  echo "Check for calico-system pods"
+  kubectl get pods -n calico-system
+  echo "Wait for Calico-system to be Running"
+  namespace=calico-system
+  sleep=600
+  wait_for_pods
 
-kubectl get pods -n calico-system
+  kubectl get pods -n calico-system
 
-sleep 10
-echo "Check for calico-apiserver pods"
-kubectl get pods -n calico-apiserver
-echo "Wait for calico-apiserver to be Running"
-namespace=calico-apiserver
-sleep=120
-wait_for_pods
+  sleep 60
+  echo "Check for calico-apiserver pods"
+  kubectl get pods -n calico-apiserver
+  echo "Wait for calico-apiserver to be Running"
+  namespace=calico-apiserver
+  sleep=120
+  wait_for_pods
 
-kubectl get pods -n calico-apiserver
+  kubectl get pods -n calico-apiserver
 
 
   ip=$(docker inspect controller-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress') 
@@ -84,69 +84,69 @@ if [ ! $(kind get clusters | grep worker) ];then
   kind create cluster --name worker --config .github/workflows/scripts/cluster.yaml --image kindest/node:v1.22.7
   
   function wait_for_pods {
-  for ns in "$namespace"; do
-    for pod in $(kubectl get pods -n $ns | grep -v NAME | awk '{ print $1 }'); do
-      counter=0
-      echo kubectl get pod $pod -n $ns
-      kubectl get pod $pod -n $ns
-      while [[ ! ($(kubectl get po $pod -n $ns | grep $pod | awk '{print $3}') =~ ^Running$|^Completed$) ]]; do
-        sleep 1
-        let counter=counter+1
+   for ns in "$namespace"; do
+      for pod in $(kubectl get pods -n $ns | grep -v NAME | awk '{ print $1 }'); do
+        counter=0
+        echo kubectl get pod $pod -n $ns
+        kubectl get pod $pod -n $ns
+        while [[ ! ($(kubectl get po $pod -n $ns | grep $pod | awk '{print $3}') =~ ^Running$|^Completed$) ]]; do
+          sleep 1
+          let counter=counter+1
 
-        if ((counter == $sleep)); then
-          echo "POD $pod failed to start in $sleep seconds"
-          kubectl get events -n $ns --sort-by='.lastTimestamp'
-          echo "Exiting"
+          if ((counter == $sleep)); then
+            echo "POD $pod failed to start in $sleep seconds"
+            kubectl get events -n $ns --sort-by='.lastTimestamp'
+            echo "Exiting"
 
-          exit -1
-        fi
+            exit -1
+          fi
+        done
       done
     done
-  done
-}
+  }
 
-snap install kubectx --classic
+  snap install kubectx --classic
 
-# Install Calico in Controller...
-echo Switch to controller context and Install Calico...
-kubectx kind-worker
-kubectx
+  # Install Calico in Controller...
+  echo Switch to controller context and Install Calico...
+  kubectx kind-worker
+  kubectx
 
-echo Install the Tigera Calico operator...
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+  echo Install the Tigera Calico operator...
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
 
-echo "Check for tigera-operator pods"
-kubectl get pods -n tigera-operator
-echo "Wait for tigera-operator to be Running"
-namespace=tigera-operator
-sleep=60
-wait_for_pods
+  echo "Check for tigera-operator pods"
+  kubectl get pods -n tigera-operator
+  echo "Wait for tigera-operator to be Running"
+  namespace=tigera-operator
+  sleep=60
+  wait_for_pods
 
-kubectl get pods -n tigera-operator
+  kubectl get pods -n tigera-operator
 
 
-echo Install the custom resource definitions manifest...
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
-sleep 10
+  echo Install the custom resource definitions manifest...
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/custom-resources.yaml
+  sleep 60
 
-echo "Check for calico-system pods"
-kubectl get pods -n calico-system
-echo "Wait for Calico-system to be Running"
-namespace=calico-system
-sleep=600
-wait_for_pods
+  echo "Check for calico-system pods"
+  kubectl get pods -n calico-system
+  echo "Wait for Calico-system to be Running"
+  namespace=calico-system
+  sleep=600
+  wait_for_pods
 
-kubectl get pods -n calico-system
+  kubectl get pods -n calico-system
 
-sleep 10
-echo "Check for calico-apiserver pods"
-kubectl get pods -n calico-apiserver
-echo "Wait for calico-apiserver to be Running"
-namespace=calico-apiserver
-sleep=120
-wait_for_pods
+  sleep 60
+  echo "Check for calico-apiserver pods"
+  kubectl get pods -n calico-apiserver
+  echo "Wait for calico-apiserver to be Running"
+  namespace=calico-apiserver
+  sleep=120
+  wait_for_pods
 
-kubectl get pods -n calico-apiserver
+  kubectl get pods -n calico-apiserver
 
   ip=$(docker inspect worker-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress')
 #  echo $ip
