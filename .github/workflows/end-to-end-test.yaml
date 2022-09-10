@@ -23,7 +23,7 @@ jobs:
     - name: build kind clusters
       run: |
         mkdir -p ${{ github.workspace }}/profile
-        sh .github/workflows/scripts/start-kind.sh
+        bash .github/workflows/scripts/start-kind.sh
 
     - name: Docker Run Action
       uses: addnab/docker-run-action@v3
