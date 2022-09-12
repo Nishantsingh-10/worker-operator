@@ -46,7 +46,7 @@ WorkerChartOptions:
   Repo: https://kubeslice.github.io/kubeslice/
   SetStrValues:
     "operator.image": "worker-operator"
-    "operator.tag": "e2e-latest"
+    "operator.tag": "${{ steps.vars.outputs.sha_commit }}"
 TestSuitesEnabled:
   HubSuite: false
   WorkerSuite: true
