@@ -3,8 +3,7 @@ on:
   push:
     branches: [ commit-hash ]
   workflow_dispatch:
-env:
-  GITHUB_COMMIT: 
+
 jobs:
   end-to-end:
     runs-on: ubuntu-20.04
@@ -30,6 +29,8 @@ jobs:
       run: |
         mkdir -p ${{ github.workspace }}/profile
         sh .github/workflows/scripts/start-kind.sh
+      env:
+         GITHUB_HEAD_COMMIT: ${{ steps.vars.outputs.sha_commit }}
 
     - name: Docker Run Action
       uses: addnab/docker-run-action@v3
