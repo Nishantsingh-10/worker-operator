@@ -6,7 +6,7 @@ if [ ! $(kind get clusters | grep controller) ];then
   ip=$(docker inspect controller-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress') 
 #  echo $ip
 # loading docker image into kind controller
-   kind load docker-image worker-operator:${{ GITHUB_HEAD_COMMIT }}
+   kind load docker-image worker-operator:${GITHUB_HEAD_COMMIT}
 # Replace loopback IP with docker ip
   kind get kubeconfig --name controller | sed "s/127.0.0.1.*/$ip:6443/g" > /home/runner/.kube/kind1.yaml
 fi
@@ -18,8 +18,7 @@ if [ ! $(kind get clusters | grep worker) ];then
   ip=$(docker inspect worker-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress')
 #  echo $ip
 # loading docker image into kind worker
-   kind load docker-image worker-operator:${{ GITHUB_HEAD_COMMIT }}
-
+   kind load docker-image worker-operator:${GITHUB_HEAD_COMMIT}
 # Replace loopback IP with docker ip
   kind get kubeconfig --name worker | sed "s/127.0.0.1.*/$ip:6443/g" > /home/runner/.kube/kind2.yaml
 fi
@@ -46,7 +45,7 @@ WorkerChartOptions:
   Repo: https://kubeslice.github.io/kubeslice/
   SetStrValues:
     "operator.image": "worker-operator"
-    "operator.tag": "${{ GITHUB_HEAD_COMMIT }}"
+    "operator.tag": "${GITHUB_HEAD_COMMIT}"
 TestSuitesEnabled:
   HubSuite: false
   WorkerSuite: true
