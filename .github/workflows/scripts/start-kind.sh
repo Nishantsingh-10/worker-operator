@@ -6,7 +6,7 @@ if [ ! $(kind get clusters | grep controller) ];then
   ip=$(docker inspect controller-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress') 
 #  echo $ip
 # loading docker image into kind controller
-   kind load docker-image netops:e2e-latest
+   kind load docker-image worker-operator:${{ steps.vars.outputs.sha_commit }}
 # Replace loopback IP with docker ip
   kind get kubeconfig --name controller | sed "s/127.0.0.1.*/$ip:6443/g" > /home/runner/.kube/kind1.yaml
 fi
@@ -18,7 +18,7 @@ if [ ! $(kind get clusters | grep worker) ];then
   ip=$(docker inspect worker-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress')
 #  echo $ip
 # loading docker image into kind worker
-   kind load docker-image netops:e2e-latest
+   kind load docker-image worker-operator:${{ steps.vars.outputs.sha_commit }}
 
 # Replace loopback IP with docker ip
   kind get kubeconfig --name worker | sed "s/127.0.0.1.*/$ip:6443/g" > /home/runner/.kube/kind2.yaml
