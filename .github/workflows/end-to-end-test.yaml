@@ -69,17 +69,7 @@ jobs:
     
     - name: wait for report deploy on site
       run: | 
-         ls -ltr
-         pwd
-         cd allure-history
-         ls -ltr
-         pwd
-         cd Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}
-         ls
-         pwd
-         cd data
-         pwd
-         ls -ltr
+         sleep 240
          echo 'https://kubeslice.github.io/e2e-allure-reports/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/index.html'
 
     - name: Run Quality Gate Check
@@ -87,4 +77,4 @@ jobs:
       with:
           ENABLE_QUALITY_GATE: true
           MINIMUM_PASS_PERCENTAGE: 75
-          ALLURE_BEHAVIORS_CSV: 'allure-history/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/data/behaviors.csv'
+          ALLURE_BEHAVIORS_CSV: "/home/runner/work/worker-operator/worker-operator/allure-history/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/data/behaviors.csv"
