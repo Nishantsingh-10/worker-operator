@@ -74,6 +74,9 @@ jobs:
          cd allure-history
          ls -ltr
          pwd
+         cd Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}
+         ls
+         pwd
          echo 'https://kubeslice.github.io/e2e-allure-reports/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/index.html'
 
     - name: Run Quality Gate Check
