@@ -68,8 +68,10 @@ jobs:
         keep_files: true
     
     - name: wait for report deploy on site
-      run: |
-         sleep 300 
+      run: | 
+         ls -ltr
+         pwd
+         cd allure-history
          ls -ltr
          pwd
          echo 'https://kubeslice.github.io/e2e-allure-reports/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/index.html'
