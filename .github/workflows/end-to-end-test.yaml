@@ -1,7 +1,7 @@
 name: end-to-end-test
 on:
   push:
-    branches: [ final-TH ]
+    branches: [ final-TH-1 ]
   workflow_dispatch:
 jobs:
   end-to-end:
