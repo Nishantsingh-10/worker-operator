@@ -73,7 +73,7 @@ jobs:
          echo 'https://kubeslice.github.io/e2e-allure-reports/Kind-${{ github.event.repository.name }}-${{ steps.date.outputs.date }}-${{ github.base_ref }}-${{ github.run_number }}/index.html'
 
     - name: Run Quality Gate Check
-      uses: NishantSingh10/allure-html-reporter-github-pages/quality-gate@v1.1
+      uses: PavanMudigonda/allure-html-reporter-github-pages/quality-gate@v1.1
       with:
           ENABLE_QUALITY_GATE: true
           MINIMUM_PASS_PERCENTAGE: 75
