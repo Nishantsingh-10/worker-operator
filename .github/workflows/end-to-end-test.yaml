@@ -68,7 +68,7 @@ jobs:
         keep_files: true
       
     - name: Run Quality Gate Check
-      uses: PavanMudigonda/allure-html-reporter-github-pages/quality-gate@v1.1
+      uses: ./quality-gate 
       with:
          ENABLE_QUALITY_GATE: true
          MINIMUM_PASS_PERCENTAGE: 75
