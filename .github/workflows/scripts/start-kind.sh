@@ -35,14 +35,14 @@ Kubeconfig: kinde2e.yaml
 ControllerCluster:
   Context: kind-controller
   HubChartOptions:
-      Repo: "https://kubeslice.github.io/kubeslice/"
+      Repo: ${CHART_VALUE}
 WorkerClusters:
 - Context: kind-controller
   NodeIP: ${IP1}
 - Context: kind-worker
   NodeIP: ${IP2}
 WorkerChartOptions:
-  Repo: https://kubeslice.github.io/kubeslice/
+  Repo: ${CHART_VALUE}
   SetStrValues:
     "operator.image": "worker-operator"
     "operator.tag": "${GITHUB_HEAD_COMMIT}"

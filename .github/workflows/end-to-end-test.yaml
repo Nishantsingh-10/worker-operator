@@ -1,8 +1,11 @@
 name: end-to-end-test
 on:
-  pull_request_target:
-    types: [ labeled ] 
   workflow_dispatch:
+    inputs:
+      ChartURL:
+        description: Enter the Chart URL
+        required: true
+        default: 'https://kubeslice.github.io/kubeslice/'
 jobs:
   end-to-end:
     if: ${{ github.event.label.name == 'ready-to-test' }}
@@ -31,6 +34,7 @@ jobs:
         sh .github/workflows/scripts/start-kind.sh
       env: 
          GITHUB_HEAD_COMMIT: ${{ steps.vars.outputs.sha_commit }}
+         CHART_VALUE: ${{ github.event.inputs.ChartURL }}
 
     - name: Docker Run Action
       uses: addnab/docker-run-action@v3
