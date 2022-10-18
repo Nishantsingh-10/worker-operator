@@ -102,6 +102,7 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 			log.Info("mutation not required", "pod metadata", deploy.Spec.Template.ObjectMeta)
 		} else {
 			log.Info("mutating deploy", "pod metadata", deploy.Spec.Template.ObjectMeta)
+			log.Info("deploy recieved inside caller", "deploy", deploy)
 			deploy = MutateDeployment(deploy, sliceName)
 			log.Info("mutated deploy", "pod metadata", deploy.Spec.Template.ObjectMeta)
 		}
@@ -172,12 +173,13 @@ func MutatePod(pod *corev1.Pod, sliceName string) *corev1.Pod {
 }
 
 func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deployment {
+
+	log.Info("deploy recieved", "deploy inside func", deploy)
+
 	// Add injection status to deployment annotations
 	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
 		deploy.Spec.Template.ObjectMeta.Annotations = map[string]string{}
 	}
-
-	log.Info("deploy recieved", "deploy", deploy)
 
 	deploy.ObjectMeta.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
 
