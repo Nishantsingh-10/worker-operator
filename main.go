@@ -64,7 +64,6 @@ import (
 	"github.com/kubeslice/worker-operator/pkg/utils"
 	deploywh "github.com/kubeslice/worker-operator/pkg/webhook/deploy"
 	podwh "github.com/kubeslice/worker-operator/pkg/webhook/pod"
-	statefulsetwh "github.com/kubeslice/worker-operator/pkg/webhook/statefulsets"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -110,24 +109,24 @@ func main() {
 
 	// Use an environment variable to be able to disable webhooks, so that we can run the operator locally
 	if utils.GetEnvOrDefault("ENABLE_WEBHOOKS", "true") == "true" {
-		mgr.GetWebhookServer().Register("/mutate-corev1-pod", &webhook.Admission{
-			Handler: &podwh.WebhookServer{
-				Client:          mgr.GetClient(),
-				SliceInfoClient: podwh.NewWebhookClient(),
-			},
-		})
+		// mgr.GetWebhookServer().Register("/mutate-corev1-pod", &webhook.Admission{
+		// 	Handler: &podwh.WebhookServer{
+		// 		Client:          mgr.GetClient(),
+		// 		SliceInfoClient: podwh.NewWebhookClient(),
+		// 	},
+		// })
 		mgr.GetWebhookServer().Register("/mutate-appsv1-deploy", &webhook.Admission{
 			Handler: &podwh.WebhookServer{
 				Client:          mgr.GetClient(),
 				SliceInfoClient: deploywh.NewWebhookClient(),
 			},
 		})
-		mgr.GetWebhookServer().Register("/mutate-appsv1-statefulset", &webhook.Admission{
-			Handler: &podwh.WebhookServer{
-				Client:          mgr.GetClient(),
-				SliceInfoClient: statefulsetwh.NewWebhookClient(),
-			},
-		})
+		// mgr.GetWebhookServer().Register("/mutate-appsv1-statefulset", &webhook.Admission{
+		// 	Handler: &podwh.WebhookServer{
+		// 		Client:          mgr.GetClient(),
+		// 		SliceInfoClient: statefulsetwh.NewWebhookClient(),
+		// 	},
+		// })
 	}
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
