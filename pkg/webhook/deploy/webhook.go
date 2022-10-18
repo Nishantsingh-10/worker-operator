@@ -39,11 +39,12 @@ type WebhookServerDeploy struct {
 
 func (wh *WebhookServerDeploy) Handle(ctx context.Context, req admission.Request) admission.Response {
 	deploy := &appsv1.Deployment{}
+	log := logger.FromContext(ctx)
 	err := wh.decoder.Decode(req, deploy)
 	if err != nil {
+		log.Error(err, "error while decoding", "decode", err.Error())
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	log := logger.FromContext(ctx)
 
 	if mutate, sliceName := wh.MutationRequired(deploy.ObjectMeta, ctx); !mutate {
 		log.Info("mutation not required", "pod metadata", deploy.Spec.Template.ObjectMeta)
