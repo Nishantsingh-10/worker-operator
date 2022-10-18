@@ -47,8 +47,10 @@ WorkerChartOptions:
     "operator.image": "worker-operator"
     "operator.tag": "${GITHUB_HEAD_COMMIT}"
 TestSuitesEnabled:
+  EmptySuite: true
   HubSuite: false
   WorkerSuite: true
+  IstioSuite: false
 EOF
 
 fi
