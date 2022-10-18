@@ -201,7 +201,7 @@ func MutateStatefulset(ss *appsv1.StatefulSet, sliceName string) *appsv1.Statefu
 		ss.Spec.Template.ObjectMeta.Annotations = map[string]string{}
 	}
 
-	ss.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
+	ss.Spec.Template.ObjectMeta.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
 
 	// Add vl3 annotation to pod template
 	annotations := ss.Spec.Template.ObjectMeta.Annotations
