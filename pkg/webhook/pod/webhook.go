@@ -173,11 +173,11 @@ func MutatePod(pod *corev1.Pod, sliceName string) *corev1.Pod {
 
 func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deployment {
 	// Add injection status to deployment annotations
-	deploy.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
-
 	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
 		deploy.Spec.Template.ObjectMeta.Annotations = map[string]string{}
 	}
+
+	deploy.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
 
 	// Add vl3 annotation to pod template
 	annotations := deploy.Spec.Template.ObjectMeta.Annotations
@@ -193,11 +193,11 @@ func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deplo
 
 func MutateStatefulset(ss *appsv1.StatefulSet, sliceName string) *appsv1.StatefulSet {
 	// Add injection status to statefulset annotations
-	ss.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
-
 	if ss.Spec.Template.ObjectMeta.Annotations == nil {
 		ss.Spec.Template.ObjectMeta.Annotations = map[string]string{}
 	}
+
+	ss.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
 
 	// Add vl3 annotation to pod template
 	annotations := ss.Spec.Template.ObjectMeta.Annotations
