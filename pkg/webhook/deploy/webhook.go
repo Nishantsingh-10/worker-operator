@@ -31,13 +31,13 @@ type SliceInfoProvider interface {
 	GetNamespaceLabels(ctx context.Context, client client.Client, namespace string) (map[string]string, error)
 }
 
-type WebhookServer struct {
+type WebhookServerDeploy struct {
 	Client          client.Client
 	decoder         *admission.Decoder
 	SliceInfoClient SliceInfoProvider
 }
 
-func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (wh *WebhookServerDeploy) Handle(ctx context.Context, req admission.Request) admission.Response {
 	deploy := &appsv1.Deployment{}
 	err := wh.decoder.Decode(req, deploy)
 	if err != nil {
@@ -60,7 +60,7 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
 }
 
-func (wh *WebhookServer) InjectDecoder(d *admission.Decoder) error {
+func (wh *WebhookServerDeploy) InjectDecoder(d *admission.Decoder) error {
 	wh.decoder = d
 	return nil
 }
@@ -85,7 +85,7 @@ func Mutate(deploy *appsv1.Deployment, sliceName string) *appsv1.Deployment {
 	return deploy
 }
 
-func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx context.Context) (bool, string) {
+func (wh *WebhookServerDeploy) MutationRequired(metadata metav1.ObjectMeta, ctx context.Context) (bool, string) {
 	log := logger.FromContext(ctx)
 	annotations := metadata.GetAnnotations()
 	//early exit if metadata in nil

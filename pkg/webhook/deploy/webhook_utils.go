@@ -10,18 +10,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type webhookClient struct {
+type webhookClientDeploy struct {
 }
 
-func NewWebhookClient() *webhookClient {
-	return &webhookClient{}
+func NewWebhookClient() *webhookClientDeploy {
+	return &webhookClientDeploy{}
 }
 
-func (w *webhookClient) SliceAppNamespaceConfigured(ctx context.Context, slice string, namespace string) (bool, error) {
+func (w *webhookClientDeploy) SliceAppNamespaceConfigured(ctx context.Context, slice string, namespace string) (bool, error) {
 	return controllers.SliceAppNamespaceConfigured(ctx, slice, namespace)
 }
 
-func (w *webhookClient) GetNamespaceLabels(ctx context.Context, client client.Client, namespace string) (map[string]string, error) {
+func (w *webhookClientDeploy) GetNamespaceLabels(ctx context.Context, client client.Client, namespace string) (map[string]string, error) {
 	log := logger.NewLogger().WithName("webhook logger")
 	nS := &corev1.Namespace{}
 	err := client.Get(context.Background(), types.NamespacedName{Name: namespace}, nS)
