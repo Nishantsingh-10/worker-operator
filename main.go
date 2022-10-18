@@ -62,7 +62,9 @@ import (
 	"github.com/kubeslice/worker-operator/pkg/logger"
 	"github.com/kubeslice/worker-operator/pkg/networkpolicy"
 	"github.com/kubeslice/worker-operator/pkg/utils"
+	deploywh "github.com/kubeslice/worker-operator/pkg/webhook/deploy"
 	podwh "github.com/kubeslice/worker-operator/pkg/webhook/pod"
+	statefulsetwh "github.com/kubeslice/worker-operator/pkg/webhook/statefulsets"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -112,6 +114,18 @@ func main() {
 			Handler: &podwh.WebhookServer{
 				Client:          mgr.GetClient(),
 				SliceInfoClient: podwh.NewWebhookClient(),
+			},
+		})
+		mgr.GetWebhookServer().Register("/mutate-appsv1-deploy", &webhook.Admission{
+			Handler: &podwh.WebhookServer{
+				Client:          mgr.GetClient(),
+				SliceInfoClient: deploywh.NewWebhookClient(),
+			},
+		})
+		mgr.GetWebhookServer().Register("/mutate-appsv1-statefulset", &webhook.Admission{
+			Handler: &podwh.WebhookServer{
+				Client:          mgr.GetClient(),
+				SliceInfoClient: statefulsetwh.NewWebhookClient(),
 			},
 		})
 	}
