@@ -179,7 +179,7 @@ func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deplo
 
 	log.Info("deploy recieved", "deploy", deploy)
 
-	deploy.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
+	deploy.ObjectMeta.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
 
 	// Add vl3 annotation to pod template
 	annotations := deploy.Spec.Template.ObjectMeta.Annotations
