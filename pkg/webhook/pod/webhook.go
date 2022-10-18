@@ -29,6 +29,7 @@ import (
 	"github.com/kubeslice/worker-operator/pkg/logger"
 	v1 "k8s.io/api/admission/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,9 +60,6 @@ type WebhookServer struct {
 }
 
 func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admission.Response {
-
-	log.Info("revieved req", "from webhook", req)
-
 	if req.Kind.Kind == "Pod" {
 		pod := &corev1.Pod{}
 		err := wh.decoder.Decode(req, pod)
@@ -69,14 +67,13 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		log := logger.FromContext(ctx)
-		log.Info("recieved kind is pod")
 
 		// handle empty namespace field when the pod is created by deployment
 		if pod.ObjectMeta.Namespace == "" {
 			pod.ObjectMeta.Namespace = req.Namespace
 		}
 
-		if mutate, sliceName := wh.MutationRequired(pod.ObjectMeta, ctx); !mutate {
+		if mutate, sliceName := wh.MutationRequired(pod.ObjectMeta, ctx, req.Kind.Kind); !mutate {
 			log.Info("mutation not required", "pod metadata", pod.ObjectMeta)
 		} else {
 			log.Info("mutating pod", "pod metadata", pod.ObjectMeta)
@@ -92,13 +89,12 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 	} else if req.Kind.Kind == "Deployment" {
 		deploy := &appsv1.Deployment{}
 		log := logger.FromContext(ctx)
-		log.Info("recieved kind is deployment")
 		err := wh.decoder.Decode(req, deploy)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
-		if mutate, sliceName := wh.MutationRequired(deploy.ObjectMeta, ctx); !mutate {
+		if mutate, sliceName := wh.MutationRequired(deploy.ObjectMeta, ctx, req.Kind.Kind); !mutate {
 			log.Info("mutation not required", "pod metadata", deploy.Spec.Template.ObjectMeta)
 		} else {
 			log.Info("mutating deploy", "pod metadata", deploy.Spec.Template.ObjectMeta)
@@ -120,17 +116,36 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 		}
 		log := logger.FromContext(ctx)
 
-		log.Info("recieved kind is statefulset")
-
-		if mutate, sliceName := wh.MutationRequired(statefulset.ObjectMeta, ctx); !mutate {
+		if mutate, sliceName := wh.MutationRequired(statefulset.ObjectMeta, ctx, req.Kind.Kind); !mutate {
 			log.Info("mutation not required", "pod metadata", statefulset.Spec.Template.ObjectMeta)
 		} else {
-			log.Info("mutating deploy", "pod metadata", statefulset.Spec.Template.ObjectMeta)
+			log.Info("mutating statefulset", "pod metadata", statefulset.Spec.Template.ObjectMeta)
 			statefulset = MutateStatefulset(statefulset, sliceName)
-			log.Info("mutated deploy", "pod metadata", statefulset.Spec.Template.ObjectMeta)
+			log.Info("mutated statefulset", "pod metadata", statefulset.Spec.Template.ObjectMeta)
 		}
 
 		marshaled, err := json.Marshal(statefulset)
+		if err != nil {
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
+	} else if req.Kind.Kind == "Job" {
+		cronJob := &batchv1.CronJob{}
+		err := wh.decoder.Decode(req, cronJob)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+		log := logger.FromContext(ctx)
+
+		if mutate, sliceName := wh.MutationRequired(cronJob.ObjectMeta, ctx, req.Kind.Kind); !mutate {
+			log.Info("mutation not required", "pod metadata", cronJob.Spec.JobTemplate.ObjectMeta)
+		} else {
+			log.Info("mutating job", "pod metadata", cronJob.Spec.JobTemplate.ObjectMeta)
+			cronJob = MutateJobs(cronJob, sliceName)
+			log.Info("mutated job", "pod metadata", cronJob.Spec.JobTemplate.ObjectMeta)
+		}
+
+		marshaled, err := json.Marshal(cronJob)
 		if err != nil {
 			return admission.Errored(http.StatusInternalServerError, err)
 		}
@@ -173,9 +188,6 @@ func MutatePod(pod *corev1.Pod, sliceName string) *corev1.Pod {
 }
 
 func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deployment {
-
-	log.Info("deploy recieved", "deploy inside func", deploy)
-
 	// Add injection status to deployment annotations
 	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
 		deploy.Spec.Template.ObjectMeta.Annotations = map[string]string{}
@@ -215,7 +227,27 @@ func MutateStatefulset(ss *appsv1.StatefulSet, sliceName string) *appsv1.Statefu
 	return ss
 }
 
-func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx context.Context) (bool, string) {
+func MutateJobs(jobs *batchv1.CronJob, sliceName string) *batchv1.CronJob {
+	// Add injection status to jobs annotations
+	if jobs.Spec.JobTemplate.Spec.Template.Annotations == nil {
+		jobs.Spec.JobTemplate.Spec.Template.Annotations = map[string]string{}
+	}
+
+	jobs.Spec.JobTemplate.Spec.Template.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
+
+	// Add vl3 annotation to pod template
+	annotations := jobs.Spec.JobTemplate.ObjectMeta.Annotations
+	annotations[nsmInjectAnnotaionKey] = "vl3-service-" + sliceName
+
+	// Add slice identifier labels to pod template
+	labels := jobs.Spec.JobTemplate.ObjectMeta.Labels
+	labels[PodInjectLabelKey] = "app"
+	labels[admissionWebhookAnnotationInjectKey] = sliceName
+
+	return jobs
+}
+
+func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx context.Context, kind string) (bool, string) {
 	log := logger.FromContext(ctx)
 	annotations := metadata.GetAnnotations()
 	//early exit if metadata in nil
@@ -227,8 +259,7 @@ func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx contex
 	// do not inject if it is already injected
 	//TODO(rahulsawra): need better way to define injected status
 	if annotations[AdmissionWebhookAnnotationStatusKey] == "injected" {
-		//TODO: how can we get to know about the kind
-		log.Info("obj is already injected")
+		log.Info("obj is already injected", "kind", kind)
 		return false, ""
 	}
 
