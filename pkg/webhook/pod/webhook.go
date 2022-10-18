@@ -27,6 +27,8 @@ import (
 
 	"github.com/kubeslice/worker-operator/controllers"
 	"github.com/kubeslice/worker-operator/pkg/logger"
+	v1 "k8s.io/api/admission/v1"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -57,31 +59,81 @@ type WebhookServer struct {
 }
 
 func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admission.Response {
-	pod := &corev1.Pod{}
-	err := wh.decoder.Decode(req, pod)
-	if err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
-	}
-	log := logger.FromContext(ctx)
+	if req.Kind.Kind == "Pod" {
+		pod := &corev1.Pod{}
+		err := wh.decoder.Decode(req, pod)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+		log := logger.FromContext(ctx)
 
-	// handle empty namespace field when the pod is created by deployment
-	if pod.ObjectMeta.Namespace == "" {
-		pod.ObjectMeta.Namespace = req.Namespace
+		// handle empty namespace field when the pod is created by deployment
+		if pod.ObjectMeta.Namespace == "" {
+			pod.ObjectMeta.Namespace = req.Namespace
+		}
+
+		if mutate, sliceName := wh.MutationRequired(pod.ObjectMeta, ctx); !mutate {
+			log.Info("mutation not required", "pod metadata", pod.ObjectMeta)
+		} else {
+			log.Info("mutating pod", "pod metadata", pod.ObjectMeta)
+			pod = MutatePod(pod, sliceName)
+			log.Info("mutated pod", "pod metadata", pod.ObjectMeta)
+		}
+
+		marshaled, err := json.Marshal(pod)
+		if err != nil {
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
+	} else if req.Kind.Kind == "Deployment" {
+		deploy := &appsv1.Deployment{}
+		log := logger.FromContext(ctx)
+		err := wh.decoder.Decode(req, deploy)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+
+		if mutate, sliceName := wh.MutationRequired(deploy.ObjectMeta, ctx); !mutate {
+			log.Info("mutation not required", "pod metadata", deploy.Spec.Template.ObjectMeta)
+		} else {
+			log.Info("mutating deploy", "pod metadata", deploy.Spec.Template.ObjectMeta)
+			deploy = MutateDeployment(deploy, sliceName)
+			log.Info("mutated deploy", "pod metadata", deploy.Spec.Template.ObjectMeta)
+		}
+
+		marshaled, err := json.Marshal(deploy)
+		if err != nil {
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
+	} else if req.Kind.Kind == "StatefulSet" {
+		statefulset := &appsv1.StatefulSet{}
+		err := wh.decoder.Decode(req, statefulset)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+		log := logger.FromContext(ctx)
+
+		if mutate, sliceName := wh.MutationRequired(statefulset.ObjectMeta, ctx); !mutate {
+			log.Info("mutation not required", "pod metadata", statefulset.Spec.Template.ObjectMeta)
+		} else {
+			log.Info("mutating deploy", "pod metadata", statefulset.Spec.Template.ObjectMeta)
+			statefulset = MutateStatefulset(statefulset, sliceName)
+			log.Info("mutated deploy", "pod metadata", statefulset.Spec.Template.ObjectMeta)
+		}
+
+		marshaled, err := json.Marshal(statefulset)
+		if err != nil {
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
 	}
 
-	if mutate, sliceName := wh.MutationRequired(pod.ObjectMeta, ctx); !mutate {
-		log.Info("mutation not required", "pod metadata", pod.ObjectMeta)
-	} else {
-		log.Info("mutating pod", "pod metadata", pod.ObjectMeta)
-		pod = Mutate(pod, sliceName)
-		log.Info("mutated pod", "pod metadata", pod.ObjectMeta)
-	}
-
-	marshaled, err := json.Marshal(pod)
-	if err != nil {
-		return admission.Errored(http.StatusInternalServerError, err)
-	}
-	return admission.PatchResponseFromRaw(req.Object.Raw, marshaled)
+	return admission.Response{AdmissionResponse: v1.AdmissionResponse{
+		Result: &metav1.Status{
+			Message: "Invalid Kind",
+		},
+	}}
 }
 
 func (wh *WebhookServer) InjectDecoder(d *admission.Decoder) error {
@@ -89,7 +141,7 @@ func (wh *WebhookServer) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func Mutate(pod *corev1.Pod, sliceName string) *corev1.Pod {
+func MutatePod(pod *corev1.Pod, sliceName string) *corev1.Pod {
 	// Add injection status to pod annotations
 	if pod.ObjectMeta.Annotations == nil {
 		pod.ObjectMeta.Annotations = map[string]string{}
@@ -112,6 +164,46 @@ func Mutate(pod *corev1.Pod, sliceName string) *corev1.Pod {
 	return pod
 }
 
+func MutateDeployment(deploy *appsv1.Deployment, sliceName string) *appsv1.Deployment {
+	// Add injection status to deployment annotations
+	deploy.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
+
+	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
+		deploy.Spec.Template.ObjectMeta.Annotations = map[string]string{}
+	}
+
+	// Add vl3 annotation to pod template
+	annotations := deploy.Spec.Template.ObjectMeta.Annotations
+	annotations[nsmInjectAnnotaionKey] = "vl3-service-" + sliceName
+
+	// Add slice identifier labels to pod template
+	labels := deploy.Spec.Template.ObjectMeta.Labels
+	labels[PodInjectLabelKey] = "app"
+	labels[admissionWebhookAnnotationInjectKey] = sliceName
+
+	return deploy
+}
+
+func MutateStatefulset(ss *appsv1.StatefulSet, sliceName string) *appsv1.StatefulSet {
+	// Add injection status to statefulset annotations
+	ss.Annotations[AdmissionWebhookAnnotationStatusKey] = "injected"
+
+	if ss.Spec.Template.ObjectMeta.Annotations == nil {
+		ss.Spec.Template.ObjectMeta.Annotations = map[string]string{}
+	}
+
+	// Add vl3 annotation to pod template
+	annotations := ss.Spec.Template.ObjectMeta.Annotations
+	annotations[nsmInjectAnnotaionKey] = "vl3-service-" + sliceName
+
+	// Add slice identifier labels to pod template
+	labels := ss.Spec.Template.ObjectMeta.Labels
+	labels[PodInjectLabelKey] = "app"
+	labels[admissionWebhookAnnotationInjectKey] = sliceName
+
+	return ss
+}
+
 func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx context.Context) (bool, string) {
 	log := logger.FromContext(ctx)
 	annotations := metadata.GetAnnotations()
@@ -124,7 +216,8 @@ func (wh *WebhookServer) MutationRequired(metadata metav1.ObjectMeta, ctx contex
 	// do not inject if it is already injected
 	//TODO(rahulsawra): need better way to define injected status
 	if annotations[AdmissionWebhookAnnotationStatusKey] == "injected" {
-		log.Info("pod is already injected")
+		//TODO: how can we get to know about the kind
+		log.Info("obj is already injected")
 		return false, ""
 	}
 

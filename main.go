@@ -62,9 +62,7 @@ import (
 	"github.com/kubeslice/worker-operator/pkg/logger"
 	"github.com/kubeslice/worker-operator/pkg/networkpolicy"
 	"github.com/kubeslice/worker-operator/pkg/utils"
-	deploywh "github.com/kubeslice/worker-operator/pkg/webhook/deploy"
 	podwh "github.com/kubeslice/worker-operator/pkg/webhook/pod"
-	statefulsetwh "github.com/kubeslice/worker-operator/pkg/webhook/statefulsets"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -116,18 +114,18 @@ func main() {
 				SliceInfoClient: podwh.NewWebhookClient(),
 			},
 		})
-		mgr.GetWebhookServer().Register("/mutate-appsv1-deploy", &webhook.Admission{
-			Handler: &deploywh.WebhookServerDeploy{
-				Client:          mgr.GetClient(),
-				SliceInfoClient: deploywh.NewWebhookClient(),
-			},
-		})
-		mgr.GetWebhookServer().Register("/mutate-appsv1-statefulset", &webhook.Admission{
-			Handler: &statefulsetwh.WebhookServer{
-				Client:          mgr.GetClient(),
-				SliceInfoClient: statefulsetwh.NewWebhookClient(),
-			},
-		})
+		// mgr.GetWebhookServer().Register("/mutate-appsv1-deploy", &webhook.Admission{
+		// 	Handler: &deploywh.WebhookServerDeploy{
+		// 		Client:          mgr.GetClient(),
+		// 		SliceInfoClient: deploywh.NewWebhookClient(),
+		// 	},
+		// })
+		// mgr.GetWebhookServer().Register("/mutate-appsv1-statefulset", &webhook.Admission{
+		// 	Handler: &statefulsetwh.WebhookServer{
+		// 		Client:          mgr.GetClient(),
+		// 		SliceInfoClient: statefulsetwh.NewWebhookClient(),
+		// 	},
+		// })
 	}
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
