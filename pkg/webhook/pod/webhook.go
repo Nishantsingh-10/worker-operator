@@ -59,6 +59,9 @@ type WebhookServer struct {
 }
 
 func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admission.Response {
+
+	log.Info("revieved req", "from webhook", req)
+
 	if req.Kind.Kind == "Pod" {
 		pod := &corev1.Pod{}
 		err := wh.decoder.Decode(req, pod)
