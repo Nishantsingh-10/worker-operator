@@ -66,6 +66,7 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		log := logger.FromContext(ctx)
+		log.Info("recieved kind is pod")
 
 		// handle empty namespace field when the pod is created by deployment
 		if pod.ObjectMeta.Namespace == "" {
@@ -88,6 +89,7 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 	} else if req.Kind.Kind == "Deployment" {
 		deploy := &appsv1.Deployment{}
 		log := logger.FromContext(ctx)
+		log.Info("recieved kind is deployment")
 		err := wh.decoder.Decode(req, deploy)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
@@ -113,6 +115,8 @@ func (wh *WebhookServer) Handle(ctx context.Context, req admission.Request) admi
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 		log := logger.FromContext(ctx)
+
+		log.Info("recieved kind is statefulset")
 
 		if mutate, sliceName := wh.MutationRequired(statefulset.ObjectMeta, ctx); !mutate {
 			log.Info("mutation not required", "pod metadata", statefulset.Spec.Template.ObjectMeta)
